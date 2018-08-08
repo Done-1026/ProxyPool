@@ -4,6 +4,7 @@ import random
 from queue import Queue
 import os
 import logging
+import time
 
 import requests
 from bs4 import BeautifulSoup
@@ -33,10 +34,13 @@ class GetProxyIp():
                     new_url = url + str(i+1)
                     logging.info(new_url)
                     resp = requests.get(new_url,headers=self.headers)
+                    time.sleep(random.random())
+                    logging.info(resp)
                     resp.encoding = 'utf-8'
                     soup = BeautifulSoup(resp.content,'html.parser')
                     tags = get_ip(self,soup)  #元组(ip,port,type,protocol)
                     for tag in tags:
+                        logging.info(tag)
                         proxy = Util.search(tag.text)
                         logging.info(proxy)
                         self.que.append(proxy)
