@@ -43,5 +43,10 @@ RULES = {
     'ip' : re.compile(r'(?:\d{1,3}\.){3}\d{1,3}'),
     'port' : re.compile(r'(?<=\s)\d{2,5}(?=\s)'),
     'protocol' :re.compile(r'[HTTPS]{4,5}',re.I),
-    'type_gn' : re.compile(r'\S*高\S*匿\S*'),
+    'type_gn' : re.compile(r'高匿'),
     }
+
+TARGETS = {
+    'xici':['http://www.xicidaili.com/nn/',1],
+    'kuai':['https://www.kuaidaili.com/free/inha/',3]
+}
