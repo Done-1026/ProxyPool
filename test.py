@@ -1,22 +1,16 @@
-import random
+from queue import Queue
+from threading import Thread
 import logging
 
-from bs4 import BeautifulSoup
-import requests
+from util import check_proxy
+from getproxy import getter
+    
+    
+getter()
+opool = getter.que
+pool = Queue()
 
-from settings import MY_USER_AGENTS
-
-logging.basicConfig(level=logging.INFO)
-
-url = 'http://www.xicidaili.com/nn/'
-url1 = 'https://www.kuaidaili.com/free/inha/1'
-headers = {}
-headers['user-agent'] = random.choice(MY_USER_AGENTS)
-
-resp = requests.get(url1,headers=headers)
-resp.encoding = 'utf-8'
-logging.info(resp)
-soup = BeautifulSoup(resp.content,'html.parser')
-ips = soup.find_all('tr')[1:]
-for i in ips:
-    print(i.text)
+while not opool.empty():
+    proxy = opool.get()
+    if check_proxy(proxy):
+        print(proxy)

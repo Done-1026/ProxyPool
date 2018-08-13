@@ -11,33 +11,39 @@ import requests
 from bs4 import BeautifulSoup
 
 from settings import MY_USER_AGENTS,TARGETS
-from util import Util
+import util
+from myThread import MyThread
 
 logging.basicConfig(level=logging.INFO)
 
 class GetProxyIp():
-    headers = {}
-    que = []
+    _headers = {}
+    que = Queue()
 
+    #def __init__(self):
+    #    self.thread_get_ip()
+    def __call__(self):
+        self.thread_get_ip()
 
     def request_url(info):
         def request_params(get_ip):
             '''各个代理网站的参数，请求及存入队列写入'''
             def req(self):
-                self.headers['user-agent'] = random.choice(MY_USER_AGENTS)
+                self._headers['user-agent'] = random.choice(MY_USER_AGENTS)
                 for i in range(info[1]):
                     new_url = info[0] + str(i+1)
                     #logging.info(new_url)
-                    resp = requests.get(new_url,headers=self.headers)
+                    resp = requests.get(new_url,headers=self._headers)
                     time.sleep(random.random())
                     resp.encoding = 'utf-8'
                     soup = BeautifulSoup(resp.content,'html.parser')
                     tags = get_ip(self,soup)  #元组(ip,port,type,protocol)
                     for tag in tags:
                         #logging.info(tag)
-                        proxy = Util.search(tag.text)
-                        logging.info(proxy)
-                        self.que.append(proxy)
+                        proxy = util.search(tag.text)
+                        #logging.info(proxy)                        
+                        self.que.put(proxy)
+                        #yield proxy
             return req
         return request_params        
 
@@ -52,14 +58,23 @@ class GetProxyIp():
         '''快代理'''
         tags = soup.find_all('tr')[1:]
         return tags
-
-    @staticmethod
+    
     def thread_get_ip(self):
+        tds = []
         funcs = [self.xici_ip,self.kuai_ip]
         for func in funcs:
-            t = threading.Thread(target=func)
-            t.start()
-
+            #logging.info(func.__name__)
+            t = MyThread(func)
+            tds.append(t)
+        for td in tds:
+            td.start()
+        for td in tds:
+            td.join()
         
-if __name__ == '__main__':
-    getip = GetProxyIp()
+
+getter = GetProxyIp()
+
+if __name__ == '__main__':    
+    getter()
+    
+

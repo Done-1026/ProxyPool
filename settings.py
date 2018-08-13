@@ -1,3 +1,4 @@
+
 import re
 
 MY_USER_AGENTS =[
@@ -50,3 +51,7 @@ TARGETS = {
     'xici':['http://www.xicidaili.com/nn/',1],
     'kuai':['https://www.kuaidaili.com/free/inha/',3]
 }
+
+TESTURLS = {
+    'http':'http://httpbin.org/ip',
+    'https':'https://www.baidu.com'}

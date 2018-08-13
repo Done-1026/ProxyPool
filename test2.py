@@ -1,3 +1,4 @@
+'''
 class A():
 
     def __init__(self):
@@ -21,4 +22,14 @@ class A():
         print(j)
 
 a = A()
+
+'''
+class A():
+    a = None
+
+    def __new__(cls):
+        if not cls.a:
+            cls.a = super().__new__(cls)
+        return cls
+
 
