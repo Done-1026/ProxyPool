@@ -21,7 +21,7 @@ def check_proxy(oproxy):
     if oproxy[2].lower() == 'http':
         try:
             r = requests.get(TESTURLS['http'],proxies=proxy,timeout=10)
-            logging.info(r.status_code)
+            #logging.info(r.status_code)
             if r.status_code == 200:
                 logging.info('可用代理%s'%proxy['http'])
                 return True
@@ -33,7 +33,7 @@ def check_proxy(oproxy):
     if oproxy[2].lower() == 'https':
         try:
             r = requests.get(TESTURLS['http'],proxies=proxy,timeout=10,verify=False)
-            logging.info(r.status_code)
+            #logging.info(r.status_code)
             if r.status_code == 200:
                 logging.info('可用代理%s'%proxy['https'])
                 return True

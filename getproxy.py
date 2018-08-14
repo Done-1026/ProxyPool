@@ -19,9 +19,10 @@ logging.basicConfig(level=logging.INFO)
 class GetProxyIp():
     _headers = {}
     que = Queue()
-
-    #def __init__(self):
-    #    self.thread_get_ip()
+    
+    def __init__(self):
+        self.funcs = [self.xici_ip,self.kuai_ip]
+        
     def __call__(self):
         self.thread_get_ip()
 
@@ -41,7 +42,7 @@ class GetProxyIp():
                     for tag in tags:
                         #logging.info(tag)
                         proxy = util.search(tag.text)
-                        #logging.info(proxy)                        
+                        logging.info(proxy)                        
                         self.que.put(proxy)
                         #yield proxy
             return req
@@ -60,9 +61,8 @@ class GetProxyIp():
         return tags
     
     def thread_get_ip(self):
-        tds = []
-        funcs = [self.xici_ip,self.kuai_ip]
-        for func in funcs:
+        tds = []        
+        for func in self.funcs:
             #logging.info(func.__name__)
             t = MyThread(func)
             tds.append(t)
