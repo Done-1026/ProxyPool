@@ -3,7 +3,7 @@ import logging
 import requests
 import logging
 
-from settings import RULES,TESTURLS
+from config import RULES,TESTURLS
 
 logging.basicConfig(level=logging.INFO)
 

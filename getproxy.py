@@ -6,34 +6,35 @@ import os
 import logging
 import time
 import threading
+from functools import wraps
 
 import requests
 from bs4 import BeautifulSoup
 
-from settings import MY_USER_AGENTS,TARGETS
+from config import MY_USER_AGENTS,TARGETS
 import util
-from myThread import MyThread
+from myThread import MyThread,CheckThread
 
 logging.basicConfig(level=logging.INFO)
 
-class GetProxyIp():
+class GetProxy():
     _headers = {}
-    que = Queue()
-    
-    def __init__(self):
-        self.funcs = [self.xici_ip,self.kuai_ip]
+    _que = Queue()   
+    funcs = []
         
     def __call__(self):
-        self.thread_get_ip()
+        self._get_proxy()
 
-    def request_url(info):
+    @classmethod        
+    def request_url(cls,info):       
         def request_params(get_ip):
             '''各个代理网站的参数，请求及存入队列写入'''
-            def req(self):
-                self._headers['user-agent'] = random.choice(MY_USER_AGENTS)
+            @wraps(get_ip)
+            def req(self):                
                 for i in range(info[1]):
                     new_url = info[0] + str(i+1)
                     #logging.info(new_url)
+                    self._headers['user-agent'] = random.choice(MY_USER_AGENTS)
                     resp = requests.get(new_url,headers=self._headers)
                     time.sleep(random.random())
                     resp.encoding = 'utf-8'
@@ -43,24 +44,12 @@ class GetProxyIp():
                         #logging.info(tag)
                         proxy = util.search(tag.text)
                         logging.info(proxy)                        
-                        self.que.put(proxy)
-                        #yield proxy
+                        self._que.put(proxy)
             return req
         return request_params        
-
-    @request_url(TARGETS['xici'])
-    def xici_ip(self,soup):
-        '''西刺代理'''
-        tags = soup.find_all('tr')[1:]
-        return tags
-
-    @request_url(TARGETS['kuai'])
-    def kuai_ip(self,soup):
-        '''快代理'''
-        tags = soup.find_all('tr')[1:]
-        return tags
     
-    def thread_get_ip(self):
+    def _get_proxy(self):
+        '''爬取代理网站，存入属性que（Queue对象中）'''
         tds = []        
         for func in self.funcs:
             #logging.info(func.__name__)
@@ -70,11 +59,39 @@ class GetProxyIp():
             td.start()
         for td in tds:
             td.join()
-        
 
-getter = GetProxyIp()
+    def _check(self,proxy):
+        '''检查代理，存入数据库'''
+        if util.check_proxy(proxy):
+            #logging.info(proxy)
+            try:
+                self.insert_proxy(proxy)
+            except:
+                print('未存储')
 
-if __name__ == '__main__':    
-    getter()
+    def insert_proxy(self,proxy):
+        '''存入数据库方法，根据数据库不同变化，在子类中重写'''
+        pass
+
+    def _refresh(self):
+        '''从队列中取出代理，多线证验证，通过的写入数据库中'''
+        tds = []
+        while not self._que.empty():
+            proxy = self._que.get()
+            #logging.info(proxy)
+            t = CheckThread(self._check,proxy)
+            tds.append(t)
+        for td in tds:
+            td.start()
+        for td in tds:
+            td.join()
+    
+    def init_pool(self):
+        self._get_proxy()
+        self._refresh()
+
+if __name__ == '__main__':
+    getter = GetProxy()
+    #getter()
     
 

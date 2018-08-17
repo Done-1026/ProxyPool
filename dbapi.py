@@ -2,21 +2,19 @@ import sqlite3
 
 
 class SqliteOpt():
-    counts = 0
 
     def __init__(self,db,tbname):
-        self.conn = sqlite3.connect(db,check_same_thread=False)
-        self.c = self.conn.cursor()
+        self._conn = sqlite3.connect(db,check_same_thread=False)
+        self.c = self._conn.cursor()
         self.tbname = tbname
         
     def close(self):
-        self.conn.commit()
-        self.conn.close()
+        self._conn.commit()
+        self._conn.close()
 
     def commit(self):
-        self.conn.commit()
+        self._conn.commit()
 
-    @staticmethod
     def createTable(self):
         pass
 
