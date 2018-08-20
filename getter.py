@@ -57,13 +57,13 @@ class SqliteClient(SqliteOpt,Client):
     def get_randproxy(self,protocol='http'):
         try:
             randproxy = random.choice(self.sel_proxies(protocol=protocol.upper()))
-            ip,*arg = randproxy
+            self.ip,*arg = randproxy
             #self.delete(ip=ip)
             self.commit()
             return randproxy[2].lower() + '://'+':'.join(randproxy[:2])
         except IndexError:
             print('no more this type proxies!')
-
+            
     def insert_proxy(self,proxy):
         self.insert(proxy)
   

@@ -15,7 +15,7 @@ class SqliteOpt():
     def commit(self):
         self._conn.commit()
 
-    def createTable(self):
+    def createTable(self,tbname):
         pass
 
     def sel_counts(self,**kw):
