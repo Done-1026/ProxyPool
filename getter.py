@@ -1,16 +1,10 @@
-from queue import Queue
-from threading import Thread
 import logging
 import random
-import sys
 
-sys.path.append('../')
-
-from util import check_proxy
 from getproxy import GetProxy
-from myThread import CheckThread
-from dbapi import SqliteOpt
+from dbapi import SqliteOpt,SqliteDb
 from config import MY_USER_AGENTS,TARGETS
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -36,7 +30,7 @@ class Client(GetProxy):
                
 class SqliteClient(SqliteOpt,Client):
 
-    def __init__(self,db,tbname):        
+    def __init__(self,db,tbname):
         SqliteOpt.__init__(self,db,tbname)
         Client.__init__(self)
 
@@ -47,26 +41,24 @@ class SqliteClient(SqliteOpt,Client):
         '''初始化，删除表中原有数据，获取最新可用代理'''
         self.delete()
         self.init_pool()
-        self.commit()
+        self.db.commit()
 
     def more_proxies(self):
         '''爬取代理，并存入数据库'''
         self.init_pool()
-        self.commit()
+        self.db.commit()
 
     def get_randproxy(self,protocol='http'):
         try:
-            randproxy = random.choice(self.sel_proxies(protocol=protocol.upper()))
-            self.ip,*arg = randproxy
-            #self.delete(ip=ip)
-            self.commit()
-            return randproxy[2].lower() + '://'+':'.join(randproxy[:2])
+            self.randproxy = random.choice(self.sel_proxies(protocol=protocol.upper()))
         except IndexError:
             print('no more this type proxies!')
-            
-    def insert_proxy(self,proxy):
-        self.insert(proxy)
-  
+            self.new_proxies()
+            self.randproxy = random.choice(self.sel_proxies(protocol=protocol.upper()))
+        self.ip, *arg = self.randproxy
+        return self.randproxy[2].lower() + '://' + ':'.join(self.randproxy[:2])
+
+# __name__ = '__main__'
 if __name__ == '__main__':
-    slt = SqliteClient('proxies.db','proxy')
-        
+    db = SqliteDb('proxies.db')
+    a = SqliteOpt(db,'proxy')
