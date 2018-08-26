@@ -1,2 +1,2 @@
 import sys
-sys.path.append('mtelm\\ProxyPool')
+sys.path.append('ProxyPool')
